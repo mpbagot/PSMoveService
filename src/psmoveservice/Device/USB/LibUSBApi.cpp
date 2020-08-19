@@ -161,6 +161,13 @@ USBDeviceState *LibUSBApi::open_usb_device(USBDeviceEnumerator* enumerator)
 		int res = libusb_open(libusb_device_state->device, &libusb_device_state->device_handle);
 		if (res == LIBUSB_SUCCESS)
 		{
+			#ifndef _WIN32
+			res = libusb_detach_kernel_driver(libusb_device_state->device_handle, 0);
+			if (res != 0)
+			{
+				SERVER_LOG_WARNING("USBAsyncRequestManager::openUSBDevice") << "Failed to detach kernel driver for USB device: " << libusb_error_name(res);
+			}
+			#endif
 			res = libusb_claim_interface(libusb_device_state->device_handle, 0);
 			if (res == 0)
 			{
